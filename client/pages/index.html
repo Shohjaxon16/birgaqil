@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BirgaQil — Dasturchilar uchun startup hamkorlik platformasi. O'z loyihangizni yarating, jamoa toping, birga qiling!">
+  <title>BirgaQil — Startup Hamkorlik Platformasi</title>
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="/" class="navbar-brand">
+        <span class="logo-icon">🚀</span>
+        <span>Birga<span class="text-gradient">Qil</span></span>
+      </a>
+      <div class="navbar-links" id="nav-links">
+        <a href="/" class="active">Bosh sahifa</a>
+        <a href="/developers" class="auth-only">Dasturchilar</a>
+        <a href="/dashboard" class="auth-only">Dashboard</a>
+        <a href="/chat" class="auth-only">Chat</a>
+      </div>
+      <div class="navbar-actions">
+        <div id="auth-buttons" class="guest-only" style="display:flex;gap:var(--space-sm)">
+          <a href="/login" class="btn btn-ghost">Kirish</a>
+          <a href="/register" class="btn btn-primary">Ro'yxatdan o'tish</a>
+        </div>
+        <div id="user-menu" class="auth-only" style="display:none;align-items:center;gap:var(--space-md)">
+          <a href="/notifications" class="btn-icon notification-badge" id="notif-btn">🔔<span class="badge-count hidden" id="notif-count">0</span></a>
+          <a href="/profile" class="avatar avatar-sm navbar-avatar">U</a>
+          <button class="btn btn-ghost btn-sm" onclick="logout()">Chiqish</button>
+        </div>
+      </div>
+      <div class="nav-toggle" id="nav-toggle">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-glow hero-glow-1"></div>
+    <div class="hero-glow hero-glow-2"></div>
+    <div class="hero-content">
+      <div class="hero-badge">✨ Dasturchilar uchun #1 platforma</div>
+      <h1>Startupingizni <span class="text-gradient">Birga Qiling</span></h1>
+      <p>O'zbekistonning eng zamonaviy startup hamkorlik platformasi. Loyihangizni joylashtiring, jamoa toping va kelajakni birga yarating.</p>
+      <div class="hero-actions">
+        <a href="/register" class="btn btn-primary btn-lg">Bepul boshlash 🚀</a>
+        <a href="/developers" class="btn btn-secondary btn-lg">Dasturchilarni ko'rish</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-number">500+</div>
+          <div class="hero-stat-label">Dasturchilar</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-number">120+</div>
+          <div class="hero-stat-label">Startuplar</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-number">50+</div>
+          <div class="hero-stat-label">Muvaffaqiyatli loyihalar</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title">Nima uchun <span class="text-gradient">BirgaQil</span>?</h2>
+      <p class="section-subtitle">Platformamiz orqali o'z g'oyangizni haqiqatga aylantirishingiz mumkin</p>
+      <div class="features-grid stagger">
+        <div class="card feature-card">
+          <div class="feature-icon">💡</div>
+          <h3>Startup Yarating</h3>
+          <p>O'z startup loyihangizni yarating va butun jamoa bilan baham ko'ring</p>
+        </div>
+        <div class="card feature-card">
+          <div class="feature-icon">👥</div>
+          <h3>Jamoa Toping</h3>
+          <p>Texnik ko'nikmalar bo'yicha filtrlang va ideal sherik toping</p>
+        </div>
+        <div class="card feature-card">
+          <div class="feature-icon">💬</div>
+          <h3>Real-time Chat</h3>
+          <p>O'zaro xabar almashish va hamkorlik qilish imkoniyati</p>
+        </div>
+        <div class="card feature-card">
+          <div class="feature-icon">🔍</div>
+          <h3>Texnologiya Filter</h3>
+          <p>React, Node.js, Python va boshqa texnologiyalar bo'yicha qidiring</p>
+        </div>
+        <div class="card feature-card">
+          <div class="feature-icon">🏆</div>
+          <h3>Premium Imkoniyatlar</h3>
+          <p>Startupingizni yuqoriga ko'taring va ko'proq e'tibor torting</p>
+        </div>
+        <div class="card feature-card">
+          <div class="feature-icon">🌍</div>
+          <h3>Networking</h3>
+          <p>O'zbekiston bo'ylab dasturchilar bilan bog'laning va tarmoqingizni kengaytiring</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section style="padding: var(--space-3xl) 0;">
+    <div class="container text-center">
+      <div class="card" style="padding: var(--space-3xl); background: var(--gradient-card);">
+        <h2 style="font-size: var(--font-size-3xl); margin-bottom: var(--space-md);">Loyihangizni bugun boshlang!</h2>
+        <p style="color: var(--text-secondary); margin-bottom: var(--space-xl); max-width: 500px; margin-left: auto; margin-right: auto;">Bepul ro'yxatdan o'ting va minglab dasturchilar jamiyatiga qo'shiling</p>
+        <a href="/register" class="btn btn-primary btn-lg">Hoziroq boshlash →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="padding: var(--space-2xl) 0; border-top: 1px solid var(--border-color); text-align: center;">
+    <div class="container">
+      <p style="color: var(--text-muted); font-size: var(--font-size-sm);">© 2024 BirgaQil. Barcha huquqlar himoyalangan.</p>
+    </div>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bildirishnomalar — BirgaQil</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/pages.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="navbar-brand"><span class="logo-icon">🚀</span><span>Birga<span
+                        class="text-gradient">Qil</span></span></a>
+            <div class="navbar-links"><a href="/">Bosh sahifa</a><a href="/developers">Dasturchilar</a><a
+                    href="/dashboard">Dashboard</a><a href="/chat">Chat</a></div>
+            <div class="navbar-actions"><a href="/profile" class="avatar avatar-sm navbar-avatar">U</a><button
+                    class="btn btn-ghost btn-sm" onclick="logout()">Chiqish</button></div>
+        </div>
+    </nav>
+
+    <div class="page-content">
+        <div class="container" style="max-width:800px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-xl)">
+                <h1 style="font-size:var(--font-size-2xl)">🔔 Bildirishnomalar</h1>
+                <button class="btn btn-ghost btn-sm" onclick="markAllRead()">Barchasini o'qilgan deb belgilash</button>
+            </div>
+            <div class="card" id="notifications-container">
+                <div class="loading-page">
+                    <div class="loader"></div>
+                </div>
+            </div>
+            <div id="pagination"></div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        if (!requireAuth()) { }
+        document.addEventListener('DOMContentLoaded', () => loadNotifs(1));
+
+        async function loadNotifs(page) {
+            const container = document.getElementById('notifications-container');
+            const data = await API.getNotifications(`page=${page}&limit=20`);
+            if (!data.success) { container.innerHTML = '<p style="padding:var(--space-xl);color:var(--text-muted)">Yuklanmadi</p>'; return; }
+            if (data.data.notifications.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔔</div><div class="empty-state-title">Bildirishnomalar yo\'q</div></div>';
+                return;
+            }
+            const icons = { join_request: '👥', accepted: '✅', rejected: '❌', new_message: '💬', new_post: '📝', system: 'ℹ️' };
+            const colors = { join_request: 'rgba(124,58,237,0.15)', accepted: 'rgba(16,185,129,0.15)', rejected: 'rgba(239,68,68,0.15)', new_message: 'rgba(59,130,246,0.15)', new_post: 'rgba(245,158,11,0.15)', system: 'rgba(6,182,212,0.15)' };
+
+            container.innerHTML = data.data.notifications.map(n => `
+        <div class="notification-item ${n.is_read ? '' : 'unread'}" onclick="markRead('${n.id}', this)">
+          <div class="notification-icon" style="background:${colors[n.type] || colors.system}">${icons[n.type] || 'ℹ️'}</div>
+          <div class="notification-content" style="flex:1">
+            <h4>${escapeHtml(n.content)}</h4>
+            <p>${timeAgo(n.created_at)}</p>
+          </div>
+          ${!n.is_read ? '<span class="badge badge-primary" style="font-size:9px">Yangi</span>' : ''}
+        </div>
+      `).join('');
+
+            renderPagination(document.getElementById('pagination'), data.data.page, data.data.totalPages, loadNotifs);
+        }
+        window.loadNotifs = loadNotifs;
+
+        async function markRead(id, el) {
+            await API.markNotificationRead(id);
+            el.classList.remove('unread');
+            const badge = el.querySelector('.badge');
+            if (badge) badge.remove();
+        }
+
+        async function markAllRead() {
+            await API.markAllNotificationsRead();
+            Toast.success('Barcha bildirishnomalar o\'qilgan deb belgilandi');
+            loadNotifs(1);
+        }
+    </script>
+</body>
+
+</html>

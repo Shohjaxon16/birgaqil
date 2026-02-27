@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dasturchilar — BirgaQil</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/pages.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="navbar-brand"><span class="logo-icon">🚀</span><span>Birga<span
+                        class="text-gradient">Qil</span></span></a>
+            <div class="navbar-links"><a href="/">Bosh sahifa</a><a href="/developers" class="active">Dasturchilar</a><a
+                    href="/dashboard">Dashboard</a><a href="/chat">Chat</a></div>
+            <div class="navbar-actions" id="nav-actions">
+                <div id="auth-buttons" style="display:flex;gap:var(--space-sm)"><a href="/login"
+                        class="btn btn-ghost">Kirish</a><a href="/register" class="btn btn-primary">Ro'yxatdan
+                        o'tish</a></div>
+                <div id="user-menu" style="display:none;align-items:center;gap:var(--space-md)"><a href="/profile"
+                        class="avatar avatar-sm navbar-avatar">U</a><button class="btn btn-ghost btn-sm"
+                        onclick="logout()">Chiqish</button></div>
+            </div>
+            <div class="nav-toggle"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+
+    <div class="page-content">
+        <div class="container">
+            <div class="animate-fade-in" style="margin-bottom:var(--space-2xl)">
+                <h1 style="font-size:var(--font-size-3xl);margin-bottom:var(--space-sm)">Dasturchilar 👨‍💻</h1>
+                <p style="color:var(--text-secondary)">O'zbekistonning eng yaxshi dasturchilari bilan tanishing</p>
+            </div>
+
+            <div class="filter-bar">
+                <div class="search-bar" style="flex:1;max-width:none">
+                    <span class="search-icon">🔍</span>
+                    <input class="form-input" id="search-input" placeholder="Ism bo'yicha qidiring..."
+                        oninput="debounceSearch()">
+                </div>
+                <select class="form-select" id="skill-filter" onchange="loadDevs(1)" style="max-width:200px">
+                    <option value="">Barcha skilllar</option>
+                    <option>JavaScript</option>
+                    <option>Python</option>
+                    <option>React</option>
+                    <option>Node.js</option>
+                    <option>Vue.js</option>
+                    <option>TypeScript</option>
+                    <option>Java</option>
+                    <option>Go</option>
+                    <option>Flutter</option>
+                    <option>Swift</option>
+                    <option>PHP</option>
+                    <option>C++</option>
+                </select>
+            </div>
+
+            <div class="dev-grid stagger" id="devs-grid">
+                <div class="loading-page">
+                    <div class="loader"></div>
+                </div>
+            </div>
+            <div id="pagination"></div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        let searchTimer;
+        function debounceSearch() { clearTimeout(searchTimer); searchTimer = setTimeout(() => loadDevs(1), 400); }
+
+        document.addEventListener('DOMContentLoaded', () => loadDevs(1));
+
+        async function loadDevs(page) {
+            const grid = document.getElementById('devs-grid');
+            showLoading(grid);
+            const search = document.getElementById('search-input').value.trim();
+            const skill = document.getElementById('skill-filter').value;
+            const params = `page=${page}&limit=12&search=${encodeURIComponent(search)}&skill=${encodeURIComponent(skill)}`;
+            const data = await API.getUsers(params);
+
+            if (!data.success) { grid.innerHTML = '<p style="color:var(--text-muted)">Yuklanmadi</p>'; return; }
+            if (data.data.users.length === 0) { grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👨‍💻</div><div class="empty-state-title">Dasturchilar topilmadi</div></div>'; document.getElementById('pagination').innerHTML = ''; return; }
+
+            grid.innerHTML = data.data.users.map(u => `
+        <div class="card dev-card">
+          <div class="avatar avatar-lg" style="margin:0 auto var(--space-md)">${u.username[0].toUpperCase()}</div>
+          <h3>${escapeHtml(u.username)} ${u.is_verified ? '<span style="color:var(--info)">✓</span>' : ''} ${u.is_premium ? '<span class="badge badge-warning" style="font-size:9px">PRO</span>' : ''}</h3>
+          <div class="bio">${u.bio ? escapeHtml(u.bio) : 'Bio qo\'shilmagan'}</div>
+          <div class="skills">${(u.skills || []).slice(0, 4).map(s => `<span class="badge badge-tech">${escapeHtml(s)}</span>`).join('')}</div>
+          <a href="/profile?id=${u.id}" class="btn btn-outline btn-sm" style="width:100%">Profilni ko'rish</a>
+        </div>
+      `).join('');
+
+            renderPagination(document.getElementById('pagination'), data.data.page, data.data.totalPages, loadDevs);
+        }
+        window.loadDevs = loadDevs;
+    </script>
+</body>
+
+</html>

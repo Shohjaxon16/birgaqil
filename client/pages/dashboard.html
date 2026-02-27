@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — BirgaQil</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/pages.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="navbar-brand"><span class="logo-icon">🚀</span><span>Birga<span
+                        class="text-gradient">Qil</span></span></a>
+            <div class="navbar-links"><a href="/">Bosh sahifa</a><a href="/developers">Dasturchilar</a><a
+                    href="/dashboard" class="active">Dashboard</a><a href="/chat">Chat</a></div>
+            <div class="navbar-actions">
+                <a href="/notifications" class="btn-icon notification-badge">🔔<span class="badge-count hidden"
+                        id="notif-count">0</span></a>
+                <a href="/profile" class="avatar avatar-sm navbar-avatar" id="nav-avatar">U</a>
+                <button class="btn btn-ghost btn-sm" onclick="logout()">Chiqish</button>
+            </div>
+            <div class="nav-toggle" id="nav-toggle"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+
+    <div class="page-content">
+        <div class="container">
+            <div class="dashboard-header animate-fade-in">
+                <h1>Salom, <span class="text-gradient" id="user-greeting">Dasturchi</span>! 👋</h1>
+                <p style="color:var(--text-secondary)">Bugun nimalar qilmoqchisiz?</p>
+            </div>
+
+            <div class="stats-grid stagger" id="stats-grid">
+                <div class="card stat-card">
+                    <div class="stat-icon purple">🚀</div>
+                    <div class="stat-value" id="stat-startups">0</div>
+                    <div class="stat-label">Startuplar</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-icon cyan">📝</div>
+                    <div class="stat-value" id="stat-posts">0</div>
+                    <div class="stat-label">Postlar</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-icon green">💬</div>
+                    <div class="stat-value" id="stat-messages">-</div>
+                    <div class="stat-label">Xabarlar</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-icon orange">🔔</div>
+                    <div class="stat-value" id="stat-notifs">0</div>
+                    <div class="stat-label">Bildirishnomalar</div>
+                </div>
+            </div>
+
+            <div class="feed-section">
+                <div>
+                    <div class="card post-compose">
+                        <h3 style="margin-bottom:var(--space-md)">Yangi post yozing</h3>
+                        <textarea class="form-input" id="post-content"
+                            placeholder="Nima fikrdaysiz? Loyihangiz haqida yozing..." rows="3"></textarea>
+                        <div style="margin-top:var(--space-md);text-align:right"><button class="btn btn-primary"
+                                onclick="createPost()">Joylash</button></div>
+                    </div>
+                    <div id="posts-feed">
+                        <div class="loading-page">
+                            <div class="loader"></div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="card" style="margin-bottom:var(--space-lg)">
+                        <h3 style="margin-bottom:var(--space-md)">Tezkor harakatlar</h3>
+                        <div class="flex flex-col gap-sm">
+                            <a href="/create-startup" class="btn btn-primary" style="width:100%">+ Yangi startup</a>
+                            <a href="/developers" class="btn btn-secondary" style="width:100%">Dasturchilarni
+                                ko'rish</a>
+                            <a href="/edit-profile" class="btn btn-outline" style="width:100%">Profilni tahrirlash</a>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom:var(--space-md)">So'nggi startuplar</h3>
+                        <div id="recent-startups">
+                            <div class="loader loader-sm"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        if (!requireAuth()) { }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = API.getUser();
+            if (user) {
+                document.getElementById('user-greeting').textContent = user.username;
+                const av = document.getElementById('nav-avatar');
+                if (av) av.textContent = user.username[0].toUpperCase();
+            }
+            loadPosts();
+            loadRecentStartups();
+            loadStats();
+        });
+
+        async function loadStats() {
+            const notifs = await API.getNotifications('limit=1');
+            if (notifs.success) document.getElementById('stat-notifs').textContent = notifs.data.unreadCount || 0;
+
+            const posts = await API.getPosts('limit=1');
+            if (posts.success) document.getElementById('stat-posts').textContent = posts.data.total || 0;
+
+            const startups = await API.getMyStartups();
+            if (startups.success) document.getElementById('stat-startups').textContent = startups.data.length || 0;
+        }
+
+        async function loadPosts() {
+            const container = document.getElementById('posts-feed');
+            const data = await API.getPosts('limit=10');
+            if (!data.success) { container.innerHTML = '<p style="color:var(--text-muted)">Postlar yuklanmadi</p>'; return; }
+            if (data.data.posts.length === 0) { container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><div class="empty-state-title">Hali postlar yo\'q</div><div class="empty-state-text">Birinchi bo\'lib post yozing!</div></div>'; return; }
+
+            container.innerHTML = data.data.posts.map(post => `
+        <div class="card post-card">
+          <div class="post-header">
+            <div class="avatar avatar-sm">${(post.username || 'U')[0].toUpperCase()}</div>
+            <div class="post-user-info">
+              <h4><a href="/profile?id=${post.user_id}">${escapeHtml(post.username)}</a></h4>
+              <span>${timeAgo(post.created_at)}</span>
+            </div>
+          </div>
+          <div class="post-content">${escapeHtml(post.content)}</div>
+        </div>
+      `).join('');
+        }
+
+        async function loadRecentStartups() {
+            const container = document.getElementById('recent-startups');
+            const data = await API.getStartups('limit=5');
+            if (!data.success || data.data.startups.length === 0) { container.innerHTML = '<p style="color:var(--text-muted);font-size:var(--font-size-sm)">Hali startuplar yo\'q</p>'; return; }
+            container.innerHTML = data.data.startups.map(s => `
+        <a href="/startup-detail?id=${s.id}" style="display:flex;align-items:center;gap:var(--space-md);padding:var(--space-sm) 0;border-bottom:1px solid var(--border-color);color:var(--text-primary)">
+          <span style="font-size:20px">🚀</span>
+          <div><div style="font-size:var(--font-size-sm);font-weight:500">${escapeHtml(s.title)}</div><div style="font-size:var(--font-size-xs);color:var(--text-muted)">${s.owner_username} · ${timeAgo(s.created_at)}</div></div>
+        </a>
+      `).join('');
+        }
+
+        async function createPost() {
+            const content = document.getElementById('post-content').value.trim();
+            if (!content) { Toast.warning('Post matnini kiriting'); return; }
+            const data = await API.createPost({ content });
+            if (data.success) { Toast.success('Post joylandi!'); document.getElementById('post-content').value = ''; loadPosts(); }
+            else Toast.error(data.message);
+        }
+    </script>
+</body>
+
+</html>

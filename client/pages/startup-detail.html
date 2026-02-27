@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Startup — BirgaQil</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/pages.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="navbar-brand"><span class="logo-icon">🚀</span><span>Birga<span
+                        class="text-gradient">Qil</span></span></a>
+            <div class="navbar-links"><a href="/">Bosh sahifa</a><a href="/developers">Dasturchilar</a><a
+                    href="/dashboard">Dashboard</a><a href="/chat">Chat</a></div>
+            <div class="navbar-actions"><a href="/profile" class="avatar avatar-sm navbar-avatar">U</a><button
+                    class="btn btn-ghost btn-sm" onclick="logout()">Chiqish</button></div>
+        </div>
+    </nav>
+
+    <div class="page-content">
+        <div class="container" id="startup-container">
+            <div class="loading-page">
+                <div class="loader"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', loadStartup);
+
+        async function loadStartup() {
+            const container = document.getElementById('startup-container');
+            const id = getUrlParam('id');
+            if (!id) { container.innerHTML = '<div class="empty-state"><div class="empty-state-title">ID kiritilmagan</div></div>'; return; }
+
+            const data = await API.getStartupById(id);
+            if (!data.success) { container.innerHTML = '<div class="empty-state"><div class="empty-state-title">Startup topilmadi</div></div>'; return; }
+            const s = data.data;
+            const user = API.getUser();
+            const isOwner = user && user.id === s.owner_id;
+
+            container.innerHTML = `
+        <div class="startup-detail-header animate-fade-in">
+          <div style="display:flex;align-items:center;gap:var(--space-md);margin-bottom:var(--space-md)">
+            <span class="badge badge-${s.status === 'active' ? 'success' : s.status === 'hiring' ? 'warning' : 'info'}">${s.status}</span>
+            ${s.is_highlighted ? '<span class="badge badge-warning">⭐ Highlighted</span>' : ''}
+          </div>
+          <h1>${escapeHtml(s.title)}</h1>
+          <div class="startup-detail-meta">
+            <span style="color:var(--text-muted)">by <a href="/profile?id=${s.owner_id}">${escapeHtml(s.owner_username)}</a></span>
+            <span style="color:var(--text-muted)">📅 ${formatDate(s.created_at)}</span>
+            <span style="color:var(--text-muted)">👥 ${s.member_count || 0} a'zo</span>
+          </div>
+        </div>
+
+        <div class="startup-detail-body">
+          <div>
+            <div class="card" style="margin-bottom:var(--space-xl)">
+              <h3 style="margin-bottom:var(--space-md)">Loyiha haqida</h3>
+              <p style="color:var(--text-secondary);line-height:1.8;font-size:var(--font-size-sm)">${escapeHtml(s.description)}</p>
+            </div>
+            <div class="card">
+              <h3 style="margin-bottom:var(--space-md)">Texnologiyalar</h3>
+              <div style="display:flex;flex-wrap:wrap;gap:var(--space-sm)">${(s.tech_stack || []).map(t => `<span class="badge badge-tech">${escapeHtml(t)}</span>`).join('') || '<span style="color:var(--text-muted)">Ko\'rsatilmagan</span>'}</div>
+            </div>
+          </div>
+          <div>
+            <div class="card" style="margin-bottom:var(--space-lg)">
+              ${!isOwner && user ? `<button class="btn btn-primary" style="width:100%;margin-bottom:var(--space-md)" onclick="joinStartup('${s.id}')">Qo'shilish</button>` : ''}
+              ${isOwner ? '<p style="color:var(--text-muted);font-size:var(--font-size-sm);text-align:center">Bu sizning startupingiz</p>' : ''}
+              ${!user ? '<p style="color:var(--text-muted);font-size:var(--font-size-sm);text-align:center">Qo\'shilish uchun <a href="/login">tizimga kiring</a></p>' : ''}
+            </div>
+            <div class="card">
+              <h3 style="margin-bottom:var(--space-md)">Jamoa a'zolari</h3>
+              <div id="members-list">${(s.members || []).map(m => `
+                <div style="display:flex;align-items:center;gap:var(--space-md);padding:var(--space-sm) 0;border-bottom:1px solid var(--border-color)">
+                  <div class="avatar avatar-sm">${(m.username || 'U')[0].toUpperCase()}</div>
+                  <div><div style="font-size:var(--font-size-sm);font-weight:500">${escapeHtml(m.username)}</div><div style="font-size:var(--font-size-xs);color:var(--text-muted)">${m.role} · ${m.status}</div></div>
+                </div>
+              `).join('') || '<p style="color:var(--text-muted);font-size:var(--font-size-sm)">Hali a\'zolar yo\'q</p>'}</div>
+            </div>
+          </div>
+        </div>
+      `;
+        }
+
+        async function joinStartup(id) {
+            const data = await API.joinStartup(id);
+            if (data.success) Toast.success(data.message);
+            else Toast.error(data.message);
+        }
+    </script>
+</body>
+
+</html>

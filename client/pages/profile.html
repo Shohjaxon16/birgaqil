@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil — BirgaQil</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/pages.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="navbar-brand"><span class="logo-icon">🚀</span><span>Birga<span
+                        class="text-gradient">Qil</span></span></a>
+            <div class="navbar-links"><a href="/">Bosh sahifa</a><a href="/developers">Dasturchilar</a><a
+                    href="/dashboard">Dashboard</a><a href="/chat">Chat</a></div>
+            <div class="navbar-actions">
+                <a href="/notifications" class="btn-icon">🔔</a>
+                <a href="/profile" class="avatar avatar-sm navbar-avatar active" id="nav-avatar">U</a>
+                <button class="btn btn-ghost btn-sm" onclick="logout()">Chiqish</button>
+            </div>
+            <div class="nav-toggle"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+
+    <div class="page-content">
+        <div class="container" style="max-width:800px">
+            <div id="profile-container">
+                <div class="loading-page">
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', loadProfile);
+
+        async function loadProfile() {
+            const container = document.getElementById('profile-container');
+            const userId = getUrlParam('id') || (API.getUser() && API.getUser().id);
+            if (!userId) { window.location.href = '/login'; return; }
+
+            const data = await API.getUserById(userId);
+            if (!data.success) { container.innerHTML = '<div class="empty-state"><div class="empty-state-title">Foydalanuvchi topilmadi</div></div>'; return; }
+            const u = data.data;
+            const isOwn = API.getUser() && API.getUser().id === u.id;
+
+            container.innerHTML = `
+        <div class="card animate-fade-in-up">
+          <div class="profile-header">
+            <div class="avatar avatar-xl" style="margin:0 auto var(--space-lg);font-size:var(--font-size-4xl)">${u.username[0].toUpperCase()}</div>
+            <div class="profile-name">${escapeHtml(u.username)} ${u.is_verified ? '<span style="color:var(--info)">✓</span>' : ''} ${u.is_premium ? '<span class="badge badge-warning">PRO</span>' : ''}</div>
+            <div class="profile-username">@${escapeHtml(u.username)}</div>
+            <div class="profile-bio">${u.bio ? escapeHtml(u.bio) : '<em style="color:var(--text-muted)">Bio qo\'shilmagan</em>'}</div>
+            <div class="profile-skills">${(u.skills || []).map(s => `<span class="badge badge-tech">${escapeHtml(s)}</span>`).join('') || '<span style="color:var(--text-muted);font-size:var(--font-size-sm)">Skilllar qo\'shilmagan</span>'}</div>
+            <div class="profile-actions">
+              ${isOwn ? `<a href="/edit-profile" class="btn btn-primary">Profilni tahrirlash</a><a href="/settings" class="btn btn-secondary">Sozlamalar</a>` : `<a href="/chat?user=${u.id}" class="btn btn-primary">Xabar yuborish</a>`}
+            </div>
+            <div class="profile-stats">
+              <div><div class="profile-stat-value" id="stat-posts">0</div><div class="profile-stat-label">Postlar</div></div>
+              <div><div class="profile-stat-value" id="stat-startups">0</div><div class="profile-stat-label">Startuplar</div></div>
+            </div>
+          </div>
+        </div>
+        <h3 style="margin:var(--space-2xl) 0 var(--space-lg);font-weight:600">Startuplari</h3>
+        <div id="user-startups"><div class="loader loader-sm"></div></div>
+      `;
+
+            // Load user's startups
+            const startups = await API.getStartups('search=' + u.username);
+            const sContainer = document.getElementById('user-startups');
+            if (startups.success && startups.data.startups.length > 0) {
+                sContainer.innerHTML = startups.data.startups.map(s => `
+          <a href="/startup-detail?id=${s.id}" class="card" style="display:block;margin-bottom:var(--space-md)">
+            <div style="font-weight:600;margin-bottom:var(--space-xs)">${escapeHtml(s.title)}</div>
+            <div style="font-size:var(--font-size-sm);color:var(--text-secondary)">${escapeHtml(s.description).substring(0, 100)}...</div>
+            <div style="margin-top:var(--space-sm);display:flex;gap:4px;flex-wrap:wrap">${(s.tech_stack || []).map(t => `<span class="badge badge-tech">${t}</span>`).join('')}</div>
+          </a>
+        `).join('');
+                document.getElementById('stat-startups').textContent = startups.data.startups.length;
+            } else {
+                sContainer.innerHTML = '<p style="color:var(--text-muted);font-size:var(--font-size-sm)">Hali startuplar yo\'q</p>';
+            }
+        }
+    </script>
+</body>
+
+</html>

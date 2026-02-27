@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat — BirgaQil</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/pages.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="navbar-brand"><span class="logo-icon">🚀</span><span>Birga<span
+                        class="text-gradient">Qil</span></span></a>
+            <div class="navbar-links"><a href="/">Bosh sahifa</a><a href="/developers">Dasturchilar</a><a
+                    href="/dashboard">Dashboard</a><a href="/chat" class="active">Chat</a></div>
+            <div class="navbar-actions"><a href="/profile" class="avatar avatar-sm navbar-avatar">U</a><button
+                    class="btn btn-ghost btn-sm" onclick="logout()">Chiqish</button></div>
+        </div>
+    </nav>
+
+    <div class="chat-layout">
+        <div class="chat-sidebar" id="chat-sidebar">
+            <div class="chat-sidebar-header">
+                <h2>💬 Xabarlar</h2>
+                <div class="search-bar" style="margin-top:var(--space-md);max-width:none">
+                    <span class="search-icon">🔍</span>
+                    <input class="form-input" placeholder="Qidirish..." id="chat-search"
+                        oninput="filterConversations()">
+                </div>
+            </div>
+            <div id="conversations-list">
+                <div class="loading-page" style="min-height:200px">
+                    <div class="loader loader-sm"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-main" id="chat-main">
+            <div class="chat-header" id="chat-header" style="display:none">
+                <button class="btn btn-ghost btn-sm" onclick="showSidebar()" style="display:none" id="back-btn">←
+                    Orqaga</button>
+                <div class="avatar avatar-sm" id="chat-partner-avatar">U</div>
+                <div>
+                    <div id="chat-partner-name" style="font-weight:600;font-size:var(--font-size-sm)">Foydalanuvchi
+                    </div>
+                    <div id="chat-partner-status" style="font-size:var(--font-size-xs);color:var(--text-muted)">Offline
+                    </div>
+                </div>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="empty-state">
+                    <div class="empty-state-icon">💬</div>
+                    <div class="empty-state-title">Suhbatni boshlang</div>
+                    <div class="empty-state-text">Chap paneldan foydalanuvchini tanlang yoki dasturchilar sahifasidan
+                        xabar yuboring</div>
+                </div>
+            </div>
+            <div id="typing-indicator" class="typing-indicator"></div>
+            <div class="chat-input-area" id="chat-input-area" style="display:none">
+                <input class="form-input" id="message-input" placeholder="Xabar yozing..."
+                    onkeypress="handleChatKey(event)" oninput="handleTyping()">
+                <button class="btn btn-primary" onclick="sendMessage()">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+    <script src="/js/chat.js"></script>
+    <script>
+        if (!requireAuth()) { }
+        let currentPartnerId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            chatManager.connect();
+            loadConversations();
+            const userId = getUrlParam('user');
+            if (userId) openChat(userId);
+            if (window.innerWidth <= 768) document.getElementById('back-btn').style.display = '';
+        });
+
+        async function loadConversations() {
+            const container = document.getElementById('conversations-list');
+            const data = await API.getConversations();
+            if (!data.success || data.data.length === 0) {
+                container.innerHTML = '<div style="padding:var(--space-xl);text-align:center;color:var(--text-muted);font-size:var(--font-size-sm)">Hali suhbatlar yo\'q</div>';
+                return;
+            }
+            container.innerHTML = data.data.map(c => `
+        <div class="chat-user-item" data-user-id="${c.partner_id}" onclick="openChat('${c.partner_id}')">
+          <div class="avatar avatar-sm">${(c.partner_username || 'U')[0].toUpperCase()}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:var(--font-size-sm);font-weight:500">${escapeHtml(c.partner_username)}</div>
+            <div style="font-size:var(--font-size-xs);color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(c.message || '')}</div>
+          </div>
+          <span class="${chatManager.isUserOnline(c.partner_id) ? 'online-dot' : 'offline-dot'}"></span>
+        </div>
+      `).join('');
+        }
+
+        async function openChat(userId) {
+            currentPartnerId = userId;
+            chatManager.currentChat = userId;
+
+            document.getElementById('chat-header').style.display = 'flex';
+            document.getElementById('chat-input-area').style.display = 'flex';
+            if (window.innerWidth <= 768) {
+                document.getElementById('chat-sidebar').classList.add('hide-mobile');
+            }
+
+            // Load user info
+            const userData = await API.getUserById(userId);
+            if (userData.success) {
+                document.getElementById('chat-partner-name').textContent = userData.data.username;
+                document.getElementById('chat-partner-avatar').textContent = userData.data.username[0].toUpperCase();
+                document.getElementById('chat-partner-status').textContent = chatManager.isUserOnline(userId) ? '🟢 Online' : 'Offline';
+            }
+
+            // Load messages
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = '<div class="loading-page" style="min-height:100px"><div class="loader loader-sm"></div></div>';
+            const data = await API.getMessages(userId);
+            if (!data.success || data.data.length === 0) {
+                container.innerHTML = '<div class="empty-state" style="padding:var(--space-xl)"><div class="empty-state-text">Hali xabarlar yo\'q. Birinchi xabaringizni yuboring!</div></div>';
+                return;
+            }
+            const me = API.getUser();
+            container.innerHTML = data.data.map(m => `
+        <div class="message-bubble ${m.sender_id === me.id ? 'message-sent' : 'message-received'}">
+          <div>${escapeHtml(m.message)}</div>
+          <div class="message-time">${new Date(m.created_at).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}</div>
+        </div>
+      `).join('');
+            container.scrollTop = container.scrollHeight;
+
+            // Mark active
+            document.querySelectorAll('.chat-user-item').forEach(el => el.classList.remove('active'));
+            const activeItem = document.querySelector(`[data-user-id="${userId}"]`);
+            if (activeItem) activeItem.classList.add('active');
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            if (!currentPartnerId || !input.value.trim()) return;
+            chatManager.sendMessage(currentPartnerId, input.value);
+            input.value = '';
+        }
+
+        function handleChatKey(e) { if (e.key === 'Enter') sendMessage(); }
+        function handleTyping() { if (currentPartnerId) chatManager.startTyping(currentPartnerId); }
+        function showSidebar() { document.getElementById('chat-sidebar').classList.remove('hide-mobile'); }
+        function filterConversations() {
+            const q = document.getElementById('chat-search').value.toLowerCase();
+            document.querySelectorAll('.chat-user-item').forEach(el => {
+                el.style.display = el.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+
+</html>
