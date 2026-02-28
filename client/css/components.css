@@ -134,7 +134,7 @@
     transition: all var(--transition-base);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
     .nav-toggle {
         display: flex;
     }
@@ -183,15 +183,11 @@
     }
 
     .navbar-actions {
-        order: -1;
+        display: none !important;
     }
 }
 
 @media (max-width: 480px) {
-    .navbar-actions .guest-only {
-        display: none !important;
-    }
-
     .navbar-brand {
         font-size: var(--font-size-base);
     }

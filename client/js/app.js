@@ -44,6 +44,14 @@ function initNavbar() {
             toggle.classList.toggle('active');
             links.classList.toggle('active');
         });
+
+        // Close menu when a link is clicked
+        links.querySelectorAll('a').forEach(a => {
+            a.addEventListener('click', () => {
+                toggle.classList.remove('active');
+                links.classList.remove('active');
+            });
+        });
     }
 
     // Update navbar based on auth state
@@ -59,7 +67,7 @@ function initNavbar() {
 
     // Handle resize - close mobile menu if screen gets larger
     window.addEventListener('resize', () => {
-        if (window.innerWidth > 768) {
+        if (window.innerWidth > 900 && toggle) {
             if (toggle.classList.contains('active')) {
                 toggle.classList.remove('active');
                 links.classList.remove('active');
