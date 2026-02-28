@@ -64,10 +64,20 @@ app.use('/api/', limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Debug middleware
+app.use((req, res, next) => {
+    if (process.env.NODE_ENV !== 'production' || req.path !== '/api/health') {
+        console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    }
+    next();
+});
+
 // =============================================
 // STATIC FILES - Serve frontend
 // =============================================
-app.use(express.static(path.join(__dirname, '..', 'client')));
+const clientPath = path.resolve(__dirname, '../client');
+console.log(`Serving static files from: ${clientPath}`);
+app.use(express.static(clientPath));
 
 // =============================================
 // API ROUTES
