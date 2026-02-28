@@ -100,10 +100,16 @@
     -webkit-text-fill-color: transparent;
 }
 
-.hero-stat-label {
-    font-size: var(--font-size-sm);
-    color: var(--text-muted);
-    margin-top: var(--space-xs);
+@media (max-width: 768px) {
+    .hero-stats {
+        flex-direction: column;
+        gap: var(--space-xl);
+        margin-top: var(--space-2xl);
+    }
+
+    .hero-stat-number {
+        font-size: var(--font-size-3xl);
+    }
 }
 
 .features {
@@ -308,6 +314,16 @@
     .feed-section {
         grid-template-columns: 1fr;
     }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* POSTS */
@@ -422,6 +438,28 @@
 .profile-stat-label {
     font-size: var(--font-size-xs);
     color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+    }
+
+    .profile-stats {
+        gap: var(--space-xl);
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-stats {
+        flex-wrap: wrap;
+        gap: var(--space-lg);
+    }
+
+    .profile-stat {
+        flex: 1 1 40%;
+    }
 }
 
 /* DEVELOPERS LIST */

@@ -77,16 +77,16 @@
   /* Typography */
   --font-primary: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
-  --font-size-base: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.25rem;
-  --font-size-2xl: 1.5rem;
-  --font-size-3xl: 1.875rem;
-  --font-size-4xl: 2.25rem;
-  --font-size-5xl: 3rem;
-  --font-size-6xl: 3.75rem;
+  --font-size-xs: clamp(0.7rem, 0.65rem + 0.25vw, 0.75rem);
+  --font-size-sm: clamp(0.8rem, 0.75rem + 0.25vw, 0.875rem);
+  --font-size-base: clamp(0.9rem, 0.85rem + 0.25vw, 1rem);
+  --font-size-lg: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --font-size-xl: clamp(1.1rem, 1rem + 0.5vw, 1.25rem);
+  --font-size-2xl: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --font-size-3xl: clamp(1.5rem, 1.35rem + 0.75vw, 1.875rem);
+  --font-size-4xl: clamp(1.75rem, 1.5rem + 1vw, 2.25rem);
+  --font-size-5xl: clamp(2.25rem, 2rem + 1.25vw, 3rem);
+  --font-size-6xl: clamp(2.75rem, 2.5rem + 1.5vw, 3.75rem);
 
   /* Transitions */
   --transition-fast: 150ms ease;
@@ -238,11 +238,11 @@ input, textarea, select, button {
 .gap-md { gap: var(--space-md); }
 .gap-lg { gap: var(--space-lg); }
 
-.grid { display: grid; }
+.grid { display: grid; gap: var(--space-lg); }
 .grid-2 { grid-template-columns: repeat(2, 1fr); }
 .grid-3 { grid-template-columns: repeat(3, 1fr); }
 .grid-4 { grid-template-columns: repeat(4, 1fr); }
-.grid-auto { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.grid-auto { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
 
 .text-center { text-align: center; }
 .text-gradient {
@@ -346,33 +346,61 @@ input, textarea, select, button {
 /* =============================================
    RESPONSIVE
    ============================================= */
+@media (max-width: 1200px) {
+  :root {
+    --max-width: 1140px;
+  }
+}
+
 @media (max-width: 1024px) {
-  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-4 { grid-template-columns: repeat(3, 1fr); }
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  
+  .container {
+    padding: 0 var(--space-xl);
+  }
 }
 
 @media (max-width: 768px) {
   :root {
-    --navbar-height: 60px;
+    --navbar-height: 64px;
   }
 
   .container {
-    padding: 0 var(--space-md);
+    padding: 0 var(--space-lg);
   }
 
-  .grid-4, .grid-3, .grid-2 {
+  .grid-4, .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-2 {
     grid-template-columns: 1fr;
   }
 
   .hide-mobile {
     display: none !important;
   }
+  
+  .flex-mobile-col {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-4, .grid-3, .grid-2 {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 480px) {
   :root {
-    --font-size-5xl: 2rem;
-    --font-size-4xl: 1.75rem;
-    --font-size-3xl: 1.5rem;
+    --space-xl: 1.5rem;
+    --space-2xl: 2rem;
+    --space-3xl: 2.5rem;
+  }
+  
+  .container {
+    padding: 0 var(--space-md);
   }
 }

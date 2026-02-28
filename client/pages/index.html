@@ -24,11 +24,11 @@
         <a href="/chat" class="auth-only">Chat</a>
       </div>
       <div class="navbar-actions">
-        <div id="auth-buttons" class="guest-only" style="display:flex;gap:var(--space-sm)">
+        <div id="auth-buttons" class="guest-only flex gap-sm">
           <a href="/login" class="btn btn-ghost">Kirish</a>
           <a href="/register" class="btn btn-primary">Ro'yxatdan o'tish</a>
         </div>
-        <div id="user-menu" class="auth-only" style="display:none;align-items:center;gap:var(--space-md)">
+        <div id="user-menu" class="auth-only hidden items-center gap-md">
           <a href="/notifications" class="btn-icon notification-badge" id="notif-btn">🔔<span class="badge-count hidden" id="notif-count">0</span></a>
           <a href="/profile" class="avatar avatar-sm navbar-avatar">U</a>
           <button class="btn btn-ghost btn-sm" onclick="logout()">Chiqish</button>
@@ -110,20 +110,20 @@
   </section>
 
   <!-- CTA -->
-  <section style="padding: var(--space-3xl) 0;">
+  <section class="page-content" style="padding: var(--space-3xl) 0;">
     <div class="container text-center">
-      <div class="card" style="padding: var(--space-3xl); background: var(--gradient-card);">
-        <h2 style="font-size: var(--font-size-3xl); margin-bottom: var(--space-md);">Loyihangizni bugun boshlang!</h2>
-        <p style="color: var(--text-secondary); margin-bottom: var(--space-xl); max-width: 500px; margin-left: auto; margin-right: auto;">Bepul ro'yxatdan o'ting va minglab dasturchilar jamiyatiga qo'shiling</p>
+      <div class="card stagger" style="padding: var(--space-3xl); background: var(--gradient-card);">
+        <h2 class="font-size-3xl" style="margin-bottom: var(--space-md);">Loyihangizni bugun boshlang!</h2>
+        <p class="text-secondary mx-auto" style="margin-bottom: var(--space-xl); max-width: 500px;">Bepul ro'yxatdan o'ting va minglab dasturchilar jamiyatiga qo'shiling</p>
         <a href="/register" class="btn btn-primary btn-lg">Hoziroq boshlash →</a>
       </div>
     </div>
   </section>
 
   <!-- FOOTER -->
-  <footer style="padding: var(--space-2xl) 0; border-top: 1px solid var(--border-color); text-align: center;">
+  <footer class="text-center" style="padding: var(--space-2xl) 0; border-top: 1px solid var(--border-color);">
     <div class="container">
-      <p style="color: var(--text-muted); font-size: var(--font-size-sm);">© 2024 BirgaQil. Barcha huquqlar himoyalangan.</p>
+      <p class="text-muted font-size-sm">© 2024 BirgaQil. Barcha huquqlar himoyalangan.</p>
     </div>
   </footer>
 

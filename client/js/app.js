@@ -56,6 +56,16 @@ function initNavbar() {
             navbar.classList.toggle('scrolled', window.scrollY > 50);
         }
     });
+
+    // Handle resize - close mobile menu if screen gets larger
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            if (toggle.classList.contains('active')) {
+                toggle.classList.remove('active');
+                links.classList.remove('active');
+            }
+        }
+    });
 }
 
 function updateNavbar() {
