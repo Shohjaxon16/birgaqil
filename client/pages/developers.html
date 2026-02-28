@@ -11,21 +11,29 @@
 </head>
 
 <body>
-    <nav class="navbar">
+    <nav class="navbar" id="navbar">
         <div class="container">
             <a href="/" class="navbar-brand"><span class="logo-icon">🚀</span><span>Birga<span
                         class="text-gradient">Qil</span></span></a>
-            <div class="navbar-links"><a href="/">Bosh sahifa</a><a href="/developers" class="active">Dasturchilar</a><a
-                    href="/dashboard">Dashboard</a><a href="/chat">Chat</a></div>
-            <div class="navbar-actions" id="nav-actions">
-                <div id="auth-buttons" style="display:flex;gap:var(--space-sm)"><a href="/login"
-                        class="btn btn-ghost">Kirish</a><a href="/register" class="btn btn-primary">Ro'yxatdan
-                        o'tish</a></div>
-                <div id="user-menu" style="display:none;align-items:center;gap:var(--space-md)"><a href="/profile"
-                        class="avatar avatar-sm navbar-avatar">U</a><button class="btn btn-ghost btn-sm"
-                        onclick="logout()">Chiqish</button></div>
+            <div class="navbar-links" id="nav-links">
+                <a href="/">Bosh sahifa</a>
+                <a href="/developers" class="active auth-only">Dasturchilar</a>
+                <a href="/dashboard" class="auth-only">Dashboard</a>
+                <a href="/chat" class="auth-only">Chat</a>
             </div>
-            <div class="nav-toggle"><span></span><span></span><span></span></div>
+            <div class="navbar-actions">
+                <div id="auth-buttons" class="guest-only" style="display:flex;gap:var(--space-sm)">
+                    <a href="/login" class="btn btn-ghost">Kirish</a>
+                    <a href="/register" class="btn btn-primary">Ro'yxatdan o'tish</a>
+                </div>
+                <div id="user-menu" class="auth-only" style="display:none;align-items:center;gap:var(--space-md)">
+                    <a href="/notifications" class="btn-icon notification-badge" id="notif-btn">🔔<span
+                            class="badge-count hidden" id="notif-count">0</span></a>
+                    <a href="/profile" class="avatar avatar-sm navbar-avatar" id="nav-avatar">U</a>
+                    <button class="btn btn-ghost btn-sm" onclick="logout()">Chiqish</button>
+                </div>
+            </div>
+            <div class="nav-toggle" id="nav-toggle"><span></span><span></span><span></span></div>
         </div>
     </nav>
 
