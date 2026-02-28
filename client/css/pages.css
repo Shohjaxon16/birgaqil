@@ -100,6 +100,12 @@
     -webkit-text-fill-color: transparent;
 }
 
+.hero-stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    margin-top: var(--space-xs);
+}
+
 @media (max-width: 768px) {
     .hero-stats {
         flex-direction: column;
